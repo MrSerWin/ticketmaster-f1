@@ -1,0 +1,23 @@
+check_interval_seconds: 3600
+timezone: "America/New_York"
+language: "ru"
+
+# События для мониторинга.
+# Можно указать event_id напрямую, или name для поиска по Ticketmaster.
+# sprint: true — если спринт-уикенд (меняет расписание субботы)
+events:
+  - name: "Formula 1 Miami 2026"
+    sprint: true
+    # label: "F1 Miami 2026"
+
+  # - name: "Grand Prix Las Vegas"
+  #   sprint: false
+
+  # - event_id: "vvG1zZ9V8h8vKs"
+  #   label: "F1 Miami 2026"
+
+notifications:
+  notify_on_new_event: true
+  notify_on_price_change: true
+
+price_history_path: "data/price_history.json"
