@@ -88,11 +88,15 @@ def load_config(config_path: str = "config.yaml") -> AppConfig:
         notify_on_price_change=notif_raw.get("notify_on_price_change", True),
     )
 
+    # Check interval: env var takes priority over config.yaml
+    env_interval = os.environ.get("CHECK_INTERVAL_SECONDS")
+    interval = int(env_interval) if env_interval else raw.get("check_interval_seconds", 3600)
+
     return AppConfig(
         ticketmaster_api_key=api_key,
         telegram_bot_token=bot_token,
         telegram_chat_id=chat_id,
-        check_interval_seconds=raw.get("check_interval_seconds", 3600),
+        check_interval_seconds=interval,
         timezone=raw.get("timezone", "America/New_York"),
         language=raw.get("language", "ru"),
         events=events,
