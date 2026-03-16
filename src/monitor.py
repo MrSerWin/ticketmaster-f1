@@ -103,39 +103,31 @@ class Monitor:
                 logger.error("Scrape failed for %s: %s", event.name, e)
 
         # 4. Track prices per event (for change detection)
-        has_changes = False
         for event in all_events:
             try:
-                change = self.tracker.check_and_update(event)
-                if change:
-                    has_changes = True
+                self.tracker.check_and_update(event)
             except Exception as e:
                 logger.error("Tracker error for %s: %s", event.event_id, e)
 
-        # 5. Send grouped summary if there are changes (or new events)
-        if has_changes:
-            for gp_name, sessions in gp_groups.items():
-                # Pick venue info from the first event
-                first_event = next(iter(next(iter(sessions.values())).values()))
-                msg = self.notifier.format_gp_summary(
-                    gp_name=gp_name,
-                    sessions=sessions,
-                    venue=first_event.location_str,
-                    language=self.config.language,
-                    is_sprint=ev_cfg.sprint,
-                )
-                self.notifier.send_message(msg)
+        # 5. Always send grouped summary with current prices
+        for gp_name, sessions in gp_groups.items():
+            first_event = next(iter(next(iter(sessions.values())).values()))
+            msg = self.notifier.format_gp_summary(
+                gp_name=gp_name,
+                sessions=sessions,
+                venue=first_event.location_str,
+                language=self.config.language,
+                is_sprint=ev_cfg.sprint,
+            )
+            self.notifier.send_message(msg)
 
-            # Handle ungrouped events individually
-            for event in ungrouped:
-                change = self.tracker.check_and_update(event)
-                if change:
-                    msg = self.notifier.format_event_notification(
-                        event, change, self.config.language,
-                    )
-                    self.notifier.send_message(msg)
+        for event in ungrouped:
+            msg = self.notifier.format_event_notification(
+                event, None, self.config.language,
+            )
+            self.notifier.send_message(msg)
 
-            logger.info("Notifications sent for %d GP groups", len(gp_groups))
+        logger.info("Notifications sent for %d GP groups", len(gp_groups))
 
     def _send_startup_message(self):
         ru = self.config.language == "ru"
